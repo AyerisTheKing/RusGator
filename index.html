@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Викторина — Русский язык и литература</title>
+  <meta name="description" content="Интерактивная викторина по теме Авлоний и родной язык. Открытый урок." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-badge">Открытый урок</div>
+    <h1>Русский язык и литература</h1>
+    <p>Нажмите на ячейку, ответьте на вопрос и откройте часть фразы</p>
+  </header>
+
+  <!-- Quiz grid: 2 rows × 3 columns -->
+  <div class="quiz-grid" id="quiz-grid"></div>
+
+  <footer>v1.1 &nbsp;·&nbsp; Викторина &nbsp;·&nbsp; 2026</footer>
+
+  <!-- Question modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-question">
+      <button class="modal-close" onclick="closeModal()" aria-label="Закрыть">✕</button>
+      <div class="modal-label">Вопрос</div>
+      <p class="modal-question" id="modal-question"></p>
+      <input
+        class="modal-input"
+        type="text"
+        id="modal-input"
+        placeholder="Введите ответ..."
+        autocomplete="off"
+      />
+      <button class="btn-check" id="btn-check" onclick="checkAnswer()">Проверить</button>
+      <div class="feedback" id="modal-feedback"></div>
+    </div>
+  </div>
+
+  <!-- Win overlay -->
+  <div class="win-overlay" id="win-overlay">
+    <div class="win-trophy">🏆</div>
+    <h2 class="win-title">Поздравляем!</h2>
+    <p class="win-phrase">
+      «Именно родной язык и литература показывают существование любой нации в мире.»
+    </p>
+    <button class="btn-reset" onclick="resetGame()">Начать заново</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
