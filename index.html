@@ -6,6 +6,7 @@
   <title>Викторина — Русский язык и литература</title>
   <meta name="description" content="Интерактивная викторина по теме Авлоний и родной язык. Открытый урок." />
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -14,12 +15,17 @@
     <div class="header-badge">Открытый урок</div>
     <h1>Русский язык и литература</h1>
     <p>Нажмите на ячейку, ответьте на вопрос и откройте часть фразы</p>
+    <div class="header-actions" id="user-controls" style="display: none;">
+      <span class="user-display" id="user-display-name"></span>
+      <button class="btn-head" onclick="openLeaderboard()">Рейтинг</button>
+      <button class="btn-head" onclick="logout()">Выйти</button>
+    </div>
   </header>
 
   <!-- Quiz grid: 2 rows × 3 columns -->
   <div class="quiz-grid" id="quiz-grid"></div>
 
-  <footer>v1.2 &nbsp;·&nbsp; Викторина &nbsp;·&nbsp; 2026</footer>
+  <footer>v1.9 &nbsp;·&nbsp; Викторина &nbsp;·&nbsp; 2026</footer>
 
   <!-- Question modal -->
   <div class="modal-overlay" id="modal-overlay">
@@ -46,7 +52,39 @@
     <p class="win-phrase">
       «Именно родной язык и литература показывают существование любой нации в мире.»
     </p>
-    <button class="btn-reset" onclick="resetGame()">Начать заново</button>
+    <button class="btn-reset" onclick="openLeaderboard(); closeWin();">Смотреть рейтинг</button>
+  </div>
+
+  <!-- Auth modal -->
+  <div class="auth-overlay active" id="auth-overlay">
+    <div class="modal auth-modal" role="dialog">
+      <div class="modal-label" id="auth-title">Вход</div>
+      <form id="login-form" onsubmit="event.preventDefault(); handleAuth('login')">
+        <input class="modal-input" type="text" id="login-username" placeholder="Никнейм" required autocomplete="username" />
+        <input class="modal-input" type="password" id="login-password" placeholder="Пароль" required autocomplete="current-password" />
+        <button type="submit" class="btn-check">Войти</button>
+      </form>
+      <form id="register-form" style="display: none;" onsubmit="event.preventDefault(); handleAuth('register')">
+        <input class="modal-input" type="text" id="reg-display-name" placeholder="Отображаемое имя" required />
+        <input class="modal-input" type="text" id="reg-username" placeholder="Никнейм" required autocomplete="username" />
+        <input class="modal-input" type="password" id="reg-password" placeholder="Пароль" required autocomplete="new-password" />
+        <input class="modal-input" type="password" id="reg-password-repeat" placeholder="Повтор пароля" required autocomplete="new-password" />
+        <button type="submit" class="btn-check">Зарегистрироваться</button>
+      </form>
+      <div class="feedback" id="auth-feedback"></div>
+      <div class="auth-switch" onclick="switchAuthMode()">
+        <span id="auth-switch-text">Нет аккаунта? Зарегистрируйтесь</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard modal -->
+  <div class="modal-overlay" id="leaderboard-overlay">
+    <div class="modal" style="max-height: 80vh; overflow-y: auto;" role="dialog">
+      <button class="modal-close" onclick="closeLeaderboard()" aria-label="Закрыть">✕</button>
+      <div class="modal-label">Рейтинг</div>
+      <div class="leaderboard-list" id="leaderboard-list"></div>
+    </div>
   </div>
 
   <script src="script.js"></script>
