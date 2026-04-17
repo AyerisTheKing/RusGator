@@ -1,4 +1,4 @@
-// v1.9
+// v2.0
 const SUPABASE_URL = "https://tdlhwokrmuyxsdleepht.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkbGh3b2tybXV5eHNkbGVlcGh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MDc3ODAsImV4cCI6MjA4NDk4Mzc4MH0.RlfUmejx2ywHNcFofZM4mNE8nIw6qxaTNzqxmf4N4-4";
 const api = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // -------------- AUTH & DATABASE LOGIC -------------- //
 
-let authMode = 'login';
+let authMode = 'register';
 
 function switchAuthMode() {
   authMode = authMode === 'login' ? 'register' : 'login';
@@ -266,6 +266,7 @@ async function handleAuth(mode) {
         }
       }
       
+      localStorage.setItem('rusgator_username', username);
       feedback.textContent = 'Регистрация успешна! Выполнен вход.';
       feedback.className = 'feedback correct';
       checkSession();
@@ -281,6 +282,7 @@ async function handleAuth(mode) {
       });
 
       if (error) throw error;
+      localStorage.setItem('rusgator_username', username);
       feedback.textContent = 'Успешный вход!';
       feedback.className = 'feedback correct';
       checkSession();
@@ -330,6 +332,13 @@ async function checkSession() {
     dbUserRecord = null;
     cellStats = {};
     solved.clear();
+    
+    const cachedUser = localStorage.getItem('rusgator_username');
+    if (cachedUser) {
+      document.getElementById('login-username').value = cachedUser;
+      document.getElementById('reg-username').value = cachedUser;
+    }
+
     document.getElementById('auth-overlay').classList.add('active');
     document.getElementById('user-controls').style.display = 'none';
   }
