@@ -1,4 +1,4 @@
-// v1.1
+// v1.2
 const questions = [
   {
     id: 1,
@@ -97,10 +97,15 @@ function closeModal() {
 function checkAnswer() {
   if (!activeCell) return;
   const q = questions.find(x => x.id === activeCell);
-  const input = document.getElementById('modal-input').value.trim().toLowerCase();
+  
+  const normalize = (str) => {
+    return str.trim().toLowerCase().replace(/ё/g, 'е');
+  };
+
+  const input = normalize(document.getElementById('modal-input').value);
   const feedback = document.getElementById('modal-feedback');
 
-  if (input === q.answer) {
+  if (input === normalize(q.answer)) {
     feedback.textContent = '✓ Верно! ' + q.display;
     feedback.className = 'feedback correct';
 
