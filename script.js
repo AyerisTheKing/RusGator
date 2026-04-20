@@ -1,4 +1,4 @@
-// v2.0
+// v2.3
 const SUPABASE_URL = "https://tdlhwokrmuyxsdleepht.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkbGh3b2tybXV5eHNkbGVlcGh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MDc3ODAsImV4cCI6MjA4NDk4Mzc4MH0.RlfUmejx2ywHNcFofZM4mNE8nIw6qxaTNzqxmf4N4-4";
 const api = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -9,42 +9,48 @@ const questions = [
     question: "На какой улице находится институт переподготовки и повышения квалификации?",
     answer: "зиё 6",
     display: "Зиё 6",
-    phrase: "Именно"
+    phrase: "Именно",
+    match: /^(зи[её]|хи[её])(\s*6)?$/i
   },
   {
     id: 2,
     question: "В какой стране Авлоний был консулом?",
     answer: "афганистан",
     display: "Афганистан",
-    phrase: "родной язык и литература"
+    phrase: "родной язык и литература",
+    match: /^афганистан/i
   },
   {
     id: 3,
     question: "Как называется школа, которую открыл Авлоний в 1902 году?",
     answer: "новометодная",
     display: "Новометодная",
-    phrase: "показывают существование"
+    phrase: "показывают существование",
+    match: /^новометодн/i
   },
   {
     id: 4,
     question: "Он ввёл модель... переходя из одного класса в другой.",
     answer: "экзамен",
     display: "Экзамен",
-    phrase: "любой"
+    phrase: "любой",
+    match: /^экзамен/i
   },
   {
     id: 5,
     question: "Он ввёл между уроками...",
     answer: "перемены",
     display: "Перемены",
-    phrase: "нации"
+    phrase: "нации",
+    match: /^перемен/i
   },
   {
     id: 6,
     question: "В каком году был указ президента Мирзиёева о посмертном награждении орденом «Буюк хизматлари учун»?",
     answer: "2020",
     display: "2020",
-    phrase: "в мире."
+    phrase: "в мире.",
+    match: /^2020/i
   }
 ];
 
@@ -86,7 +92,7 @@ function openQuestion(id) {
   activeCell = id;
 
   if (!cellStats[id]) {
-    cellStats[id] = { time: 0, errors: 0 };
+    cellStats[id] = { time: 1, errors: 0 };
   }
 
   const q = questions.find(x => x.id === id);
@@ -125,10 +131,13 @@ function checkAnswer() {
     return str.trim().toLowerCase().replace(/ё/g, 'е');
   };
 
-  const input = normalize(document.getElementById('modal-input').value);
+  const inputStr = document.getElementById('modal-input').value.trim();
+  const inputNorm = normalize(inputStr);
   const feedback = document.getElementById('modal-feedback');
 
-  if (input === normalize(q.answer)) {
+  const isCorrect = q.match ? q.match.test(inputStr) : (inputNorm === normalize(q.answer));
+
+  if (isCorrect) {
     if (currentTimer) clearInterval(currentTimer);
     
     document.getElementById('modal-input').disabled = true;
@@ -215,78 +224,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // -------------- AUTH & DATABASE LOGIC -------------- //
 
-let authMode = 'register';
-
-function switchAuthMode() {
-  authMode = authMode === 'login' ? 'register' : 'login';
-  document.getElementById('login-form').style.display = authMode === 'login' ? 'block' : 'none';
-  document.getElementById('register-form').style.display = authMode === 'register' ? 'block' : 'none';
-  document.getElementById('auth-title').textContent = authMode === 'login' ? 'Вход' : 'Регистрация';
-  document.getElementById('auth-switch-text').textContent = authMode === 'login' ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войти';
-  document.getElementById('auth-feedback').textContent = '';
-  document.getElementById('auth-feedback').className = 'feedback';
-}
-
-async function handleAuth(mode) {
+async function handleAuth() {
   const feedback = document.getElementById('auth-feedback');
   feedback.className = 'feedback';
   feedback.textContent = 'Загрузка...';
 
   try {
-    if (mode === 'register') {
-      const display_name = document.getElementById('reg-display-name').value.trim();
-      const username = document.getElementById('reg-username').value.trim();
-      const password = document.getElementById('reg-password').value;
-      const passwordRepeat = document.getElementById('reg-password-repeat').value;
-
-      if (password !== passwordRepeat) {
-        feedback.textContent = 'Пароли не совпадают';
-        feedback.className = 'feedback wrong';
-        return;
-      }
-
-      const email = `${username}@rusgator.local`;
-      const { data, error } = await api.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { display_name, username }
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.user) {
-        const { error: dbError } = await api.from('Rus_Users').insert([
-          { id: data.user.id, display_name, username }
-        ]);
-        if (dbError) {
-          if (dbError.code === '23505') throw new Error("Никнейм уже занят");
-          throw dbError;
-        }
-      }
-      
-      localStorage.setItem('rusgator_username', username);
-      feedback.textContent = 'Регистрация успешна! Выполнен вход.';
-      feedback.className = 'feedback correct';
-      checkSession();
-
-    } else {
-      const username = document.getElementById('login-username').value.trim();
-      const password = document.getElementById('login-password').value;
-      const email = `${username}@rusgator.local`;
-      
-      const { data, error } = await api.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) throw error;
-      localStorage.setItem('rusgator_username', username);
-      feedback.textContent = 'Успешный вход!';
-      feedback.className = 'feedback correct';
-      checkSession();
+    const display_name = document.getElementById('reg-display-name').value.trim();
+    if (!display_name) {
+      feedback.textContent = 'Введите имя';
+      feedback.className = 'feedback wrong';
+      return;
     }
+
+    const username = 'player_' + Math.random().toString(36).substring(2, 10);
+    const password = Math.random().toString(36).substring(2, 12) + "A1!"; 
+    const email = `${username}@rusgator.local`;
+    
+    const { data, error } = await api.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { display_name, username }
+      }
+    });
+
+    if (error) throw error;
+
+    if (data.user) {
+      const { error: dbError } = await api.from('Rus_Users').insert([
+        { id: data.user.id, display_name, username }
+      ]);
+      if (dbError && dbError.code !== '23505') {
+        throw dbError;
+      }
+    }
+    
+    localStorage.setItem('rusgator_username', username);
+    localStorage.setItem('rusgator_password', password);
+    feedback.textContent = 'Вход выполнен!';
+    feedback.className = 'feedback correct';
+    checkSession();
   } catch (err) {
     feedback.textContent = err.message || 'Произошла ошибка';
     feedback.className = 'feedback wrong';
@@ -313,15 +291,23 @@ async function checkSession() {
       for (let i = 1; i <= 6; i++) {
         const blk = userData[`block_${i}`];
         if (blk) {
-          cellStats[i] = { time: blk.time, errors: blk.errors };
-          if (blk.time > 0) solved.add(i);
+          cellStats[i] = { time: blk.time || 0, errors: blk.errors || 0 };
+          if (blk.time > 0) {
+            solved.add(i);
+          }
         } else {
           cellStats[i] = { time: 0, errors: 0 };
         }
       }
     } else {
-      dbUserRecord = {};
-      for (let i = 1; i <= 6; i++) cellStats[i] = { time: 0, errors: 0 };
+      // User is authenticated but not in our DB. This means the account was deleted.
+      await api.auth.signOut();
+      localStorage.removeItem('rusgator_username');
+      localStorage.removeItem('rusgator_password');
+      currentUser = null;
+      dbUserRecord = null;
+      checkSession();
+      return;
     }
 
     document.getElementById('auth-overlay').classList.remove('active');
@@ -334,11 +320,28 @@ async function checkSession() {
     solved.clear();
     
     const cachedUser = localStorage.getItem('rusgator_username');
-    if (cachedUser) {
-      document.getElementById('login-username').value = cachedUser;
-      document.getElementById('reg-username').value = cachedUser;
+    const cachedPass = localStorage.getItem('rusgator_password');
+    
+    if (cachedUser && cachedPass) {
+      document.getElementById('auth-feedback').textContent = 'Вход...';
+      try {
+        const email = `${cachedUser}@rusgator.local`;
+        const { data, error } = await api.auth.signInWithPassword({ email, password: cachedPass });
+        if (!error && data.user) {
+          checkSession();
+          return;
+        } else {
+          localStorage.removeItem('rusgator_username');
+          localStorage.removeItem('rusgator_password');
+        }
+      } catch (err) {
+         console.log("Silent login failed", err);
+         localStorage.removeItem('rusgator_username');
+         localStorage.removeItem('rusgator_password');
+      }
     }
 
+    document.getElementById('auth-feedback').textContent = '';
     document.getElementById('auth-overlay').classList.add('active');
     document.getElementById('user-controls').style.display = 'none';
   }
@@ -411,7 +414,6 @@ async function openLeaderboard() {
         <span class="lb-rank">${index + 1}</span>
         <div class="lb-user">
           <span class="lb-name">${p.display_name}</span>
-          <span class="lb-nick">@${p.username}</span>
         </div>
       </div>
       <div class="lb-right">
