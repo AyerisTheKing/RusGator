@@ -261,6 +261,20 @@ header p {
 .modal-input:focus { border-color: var(--gold-dim); }
 .modal-input::placeholder { color: var(--text-muted); }
 
+select.modal-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%238a7f68" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+select.modal-input option {
+  background: var(--card);
+  color: var(--text);
+}
+
 .btn-check {
   width: 100%;
   background: var(--gold);

@@ -25,7 +25,7 @@
   <!-- Quiz grid: 2 rows × 3 columns -->
   <div class="quiz-grid" id="quiz-grid"></div>
 
-  <footer>v2.3 &nbsp;·&nbsp; Викторина &nbsp;·&nbsp; 2026</footer>
+  <footer>v2.4 &nbsp;·&nbsp; Викторина &nbsp;·&nbsp; 2026</footer>
 
   <!-- Question modal -->
   <div class="modal-overlay" id="modal-overlay">
@@ -61,6 +61,31 @@
       <div class="modal-label" id="auth-title">Вход</div>
       <form id="register-form" onsubmit="event.preventDefault(); handleAuth()">
         <input class="modal-input" type="text" id="reg-display-name" placeholder="Ваше имя" required autocomplete="off" />
+        <div style="display: flex; gap: 10px; margin-bottom: 14px;">
+          <select id="reg-class-number" class="modal-input" style="margin-bottom: 0;" required>
+            <option value="" disabled selected>Класс</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+          </select>
+          <select id="reg-class-letter" class="modal-input" style="margin-bottom: 0;" required>
+            <option value="" disabled selected>Буква</option>
+            <option value="А">А</option>
+            <option value="Б">Б</option>
+            <option value="В">В</option>
+            <option value="Г">Г</option>
+            <option value="Д">Д</option>
+            <option value="И">И</option>
+          </select>
+        </div>
         <button type="submit" class="btn-check">Начать</button>
       </form>
       <div class="feedback" id="auth-feedback"></div>

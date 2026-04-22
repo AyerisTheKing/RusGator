@@ -1,4 +1,4 @@
-// v2.3
+// v2.4
 const SUPABASE_URL = "https://tdlhwokrmuyxsdleepht.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkbGh3b2tybXV5eHNkbGVlcGh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MDc3ODAsImV4cCI6MjA4NDk4Mzc4MH0.RlfUmejx2ywHNcFofZM4mNE8nIw6qxaTNzqxmf4N4-4";
 const api = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -230,9 +230,26 @@ async function handleAuth() {
   feedback.textContent = 'Загрузка...';
 
   try {
-    const display_name = document.getElementById('reg-display-name').value.trim();
-    if (!display_name) {
-      feedback.textContent = 'Введите имя';
+    const raw_name = document.getElementById('reg-display-name').value.trim();
+    const class_num = document.getElementById('reg-class-number').value;
+    const class_letter = document.getElementById('reg-class-letter').value;
+
+    if (!raw_name || !class_num || !class_letter) {
+      feedback.textContent = 'Заполните все поля';
+      feedback.className = 'feedback wrong';
+      return;
+    }
+
+    const display_name = `${raw_name} (${class_num} "${class_letter}")`;
+
+    // Check for existence of the exact identical display_name
+    const { data: existing, error: checkErr } = await api
+      .from('Rus_Users')
+      .select('id')
+      .eq('display_name', display_name);
+      
+    if (existing && existing.length > 0) {
+      feedback.textContent = 'Игрок с таким именем из этого класса уже зарегистрирован!';
       feedback.className = 'feedback wrong';
       return;
     }
